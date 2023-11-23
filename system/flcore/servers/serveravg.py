@@ -35,7 +35,7 @@ class FedAvg(Server):
     
         # Select the top percentage of the clients with the highest entropies
         num_clients = len(sorted_clients)
-        selected_clients = [client for client, entropy in sorted_clients[:num_clients//4]]
+        selected_clients = [client for client, entropy in sorted_clients[ : int(num_clients * self.join_ratio)]]
         print(f'Selected Clients: {len(selected_clients)} clients')
         return selected_clients
     
@@ -59,11 +59,14 @@ class FedAvg(Server):
         # [t.join() for t in threads]
 
         self.receive_models()
+
         if self.dlg_eval and i%self.dlg_gap == 0:
             self.call_dlg(i)
+        
         self.aggregate_parameters()
 
         self.Budget.append(time.time() - s_t)
+        
         print('-'*25, 'time cost', '-'*25, self.Budget[-1])
 
 
@@ -81,19 +84,16 @@ class FedAvg(Server):
                 print('Normal Selection')
 
             if i == 0 and os.path.exists(destino):
-                print('-=-='*40)
                 self.load_model()
                 for cliente in self.selected_clients:
                     cliente.model = self.global_model
 
                 self.treinamento(args, i)
-
                 if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                     break
 
             else:
                 self.treinamento(args, i)
-                
                 if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                     break
 
