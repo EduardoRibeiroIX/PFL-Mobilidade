@@ -1,3 +1,4 @@
+import torch
 import time
 from flcore.clients.clientavg import clientAVG
 from flcore.servers.serverbase import Server
@@ -7,6 +8,7 @@ import sys
 
 
 class FedAvg(Server):
+
     def __init__(self, args, times):
         super().__init__(args, times)
 
@@ -21,6 +23,7 @@ class FedAvg(Server):
         # self.load_model()
         self.Budget = []
     
+
     def select_best_entropy(self):
         dict_clients = {}
         entropies = [0] * len(self.clients)  # initialize entropies with zeros
@@ -63,7 +66,7 @@ class FedAvg(Server):
         if self.dlg_eval and i%self.dlg_gap == 0:
             self.call_dlg(i)
         
-        self.aggregate_parameters()
+        self.users += self.aggregate_parameters()
 
         self.Budget.append(time.time() - s_t)
         
@@ -73,7 +76,8 @@ class FedAvg(Server):
     def train(self, args):
         caminhoAtual = os.getcwd()
         destino = f'{caminhoAtual}/models/fmnist/FedAvg_server.pt'
-
+        
+            
         for i in range(self.global_rounds+1):
 
             if args.entropy:
@@ -89,11 +93,14 @@ class FedAvg(Server):
                     cliente.model = self.global_model
 
                 self.treinamento(args, i)
+                
                 if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                     break
 
             else:
                 self.treinamento(args, i)
+                print(self.users)
+                self.users = []
                 if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                     break
 
