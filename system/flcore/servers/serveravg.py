@@ -43,6 +43,18 @@ class FedAvg(Server):
         return selected_clients
     
 
+    def select_clients_bellow_average(self):
+
+        selected_clients = []
+
+        for idx_accuracy in range(len(self.list_of_accuracies)):
+
+            if self.list_of_accuracies[idx_accuracy] < self.average_accuracy:
+                selected_clients.append(self.list_of_clients[idx_accuracy])
+
+        return selected_clients
+
+
     def treinamento(self, args, i):
         s_t = time.time()
 

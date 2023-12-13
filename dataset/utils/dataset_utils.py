@@ -151,6 +151,7 @@ def split_data(X, y):
 
     return train_data, test_data
 
+
 def save_file(config_path, train_path, test_path, train_data, test_data, num_clients, 
                 num_classes, statistic, niid=False, balance=True, partition=None):
     config = {
