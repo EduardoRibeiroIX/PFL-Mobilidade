@@ -40,9 +40,11 @@ class Server(object):
         self.selected_clients = []
         self.train_slow_clients = []
         self.send_slow_clients = []
-
-        self.users = []            
-
+#-----------------------------------------------------------------
+        self.users = []
+        self.list_of_accuracies = []
+        self.average_accuracy = []          
+#-----------------------------------------------------------------
         self.uploaded_weights = []
         self.uploaded_ids = []
         self.uploaded_models = []
@@ -331,6 +333,11 @@ class Server(object):
         accs = [a / n for a, n in zip(stats[2], stats[1])]
         aucs = [a / n for a, n in zip(stats[3], stats[1])]
         
+        # Escrever o valor da variável no arquivo
+        with open("saida.txt", "a") as arquivo:
+            arquivo.write(str(test_acc) + "," + str(train_loss)+ "\n")
+
+
         if acc == None:
             self.rs_test_acc.append(test_acc)
         else:

@@ -5,6 +5,7 @@ from flcore.servers.serverbase import Server
 from threading import Thread
 import os
 import sys
+import numpy as np
 
 
 class FedAvg(Server):
@@ -45,12 +46,16 @@ class FedAvg(Server):
 
     def select_clients_bellow_average(self):
 
+        for i in range(len(self.clients)):
+            self.list_of_accuracies.append(self.clients[i].test_metrics()[0])
+
+        self.average_accuracy = np.mean(self.list_of_accuracies)
         selected_clients = []
 
         for idx_accuracy in range(len(self.list_of_accuracies)):
 
             if self.list_of_accuracies[idx_accuracy] < self.average_accuracy:
-                selected_clients.append(self.list_of_clients[idx_accuracy])
+                selected_clients.append(self.clients[idx_accuracy])
 
         return selected_clients
 
@@ -92,12 +97,14 @@ class FedAvg(Server):
             
         for i in range(self.global_rounds+1):
 
-            if args.entropy:
-                self.selected_clients = self.select_best_entropy()
-                print('Entropy Selection')
-            else:
-                self.selected_clients = self.select_clients()
-                print('Normal Selection')
+            # if args.entropy:
+            #     self.selected_clients = self.select_best_entropy()
+            #     print('Entropy Selection')
+            # else:
+            #     self.selected_clients = self.select_clients()
+            #     print('Normal Selection')
+
+            self.selected_clients = self.select_clients_bellow_average()
 
             if i == 0 and os.path.exists(destino):
                 self.load_model()
@@ -105,7 +112,9 @@ class FedAvg(Server):
                     cliente.model = self.global_model
 
                 self.treinamento(args, i)
-                
+                print(len(self.selected_clients))
+                print(len(self.clients))
+                sys.exit()
                 if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                     break
 
