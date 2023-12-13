@@ -45,16 +45,21 @@ class FedAvg(Server):
     
 
     def select_clients_bellow_average(self):
+        list_of_accuracies = []
+        average_accuracy = [] 
+
 
         for i in range(len(self.clients)):
-            self.list_of_accuracies.append(self.clients[i].test_metrics()[0])
+            list_of_accuracies.append(self.clients[i].test_metrics()[0])
 
-        self.average_accuracy = np.mean(self.list_of_accuracies)
+
+        average_accuracy = np.mean(list_of_accuracies)
         selected_clients = []
 
-        for idx_accuracy in range(len(self.list_of_accuracies)):
 
-            if self.list_of_accuracies[idx_accuracy] < self.average_accuracy:
+        for idx_accuracy in range(len(list_of_accuracies)):
+            
+            if list_of_accuracies[idx_accuracy] < average_accuracy:
                 selected_clients.append(self.clients[idx_accuracy])
 
         return selected_clients
@@ -112,15 +117,11 @@ class FedAvg(Server):
                     cliente.model = self.global_model
 
                 self.treinamento(args, i)
-                print(len(self.selected_clients))
-                print(len(self.clients))
-                sys.exit()
                 if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                     break
 
             else:
                 self.treinamento(args, i)
-                print(self.users)
                 self.users = []
                 if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                     break

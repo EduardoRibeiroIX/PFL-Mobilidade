@@ -42,8 +42,7 @@ class Server(object):
         self.send_slow_clients = []
 #-----------------------------------------------------------------
         self.users = []
-        self.list_of_accuracies = []
-        self.average_accuracy = []          
+                 
 #-----------------------------------------------------------------
         self.uploaded_weights = []
         self.uploaded_ids = []
@@ -143,9 +142,9 @@ class Server(object):
                 self.uploaded_ids.append(client.id)
                 self.uploaded_weights.append(client.train_samples)
                 self.uploaded_models.append(client.model)
-            if client.id == 0:
-                client.set_parameters_malicioso(client.model)
-                self.uploaded_models[0] = client.model
+            # if client.id == 0:
+            #     client.set_parameters_malicioso(client.model)
+            #     self.uploaded_models[0] = client.model
         for i, w in enumerate(self.uploaded_weights):
             self.uploaded_weights[i] = w / tot_samples
 
