@@ -122,7 +122,7 @@ class FedAvg(Server):
             if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                 break
 
-            else:
+            #else:
                 self.treinamento(args, i)
                 self.users = []
                 if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
