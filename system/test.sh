@@ -12,8 +12,14 @@ python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 60 -ent True -did 0 
 # Save the output of the second command to a text file
 cat command2.log > EntropySelection.txt
 
+# Run the second command and store the output in a log file
+python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 60 -ba True -did 0 2>&1 | tee command2.log
+
+# Save the output of the second command to a text file
+cat command3.log > BellowAverage.tx
+
 # Remove the individual log files
-rm command1.log command2.log
+rm command1.log command2.log command3.log
 
 # Define an array of -cdr values
 cdr_values=(0.16 0.33 0.50)
@@ -32,7 +38,7 @@ for cdr_value in "${cdr_values[@]}"; do
     # Save the output of the second command to a text file
     cat "command2_$cdr_value.log" > "EntropySelection_$cdr_value.txt"
 
-    python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 60 -cba True -cdr "$cdr_value" -did 0 2>&1 | tee "command2_$cdr_value.log"
+    python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 60 -ba True -cdr "$cdr_value" -did 0 2>&1 | tee "command2_$cdr_value.log"
 
     # Save the output of the second command to a text file
     cat "command3_$cdr_value.log" > "BellowAverage_$cdr_value.txt"
