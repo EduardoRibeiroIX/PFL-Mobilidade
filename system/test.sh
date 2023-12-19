@@ -32,8 +32,13 @@ for cdr_value in "${cdr_values[@]}"; do
     # Save the output of the second command to a text file
     cat "command2_$cdr_value.log" > "EntropySelection_$cdr_value.txt"
 
+    python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 60 -cba True -cdr "$cdr_value" -did 0 2>&1 | tee "command2_$cdr_value.log"
+
+    # Save the output of the second command to a text file
+    cat "command3_$cdr_value.log" > "BellowAverage_$cdr_value.txt"
+
     # Remove the individual log files
-    rm "command1_$cdr_value.log" "command2_$cdr_value.log"
+    rm "command1_$cdr_value.log" "command2_$cdr_value.log" "command3_$cdr_value.log"
 done
 
 
