@@ -113,14 +113,14 @@ class FedAvg(Server):
                 print('Normal Selection')
 
 
-            if i == 0 and os.path.exists(destino):
-                self.load_model()
-                for cliente in self.selected_clients:
-                    cliente.model = self.global_model
+            # if i == 0 and os.path.exists(destino):
+            #     self.load_model()
+            #     for cliente in self.selected_clients:
+            #         cliente.model = self.global_model
 
-                self.treinamento(args, i)
-                if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
-                    break
+            self.treinamento(args, i)
+            if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
+                break
 
             else:
                 self.treinamento(args, i)
