@@ -353,6 +353,8 @@ if __name__ == "__main__":
                         choices=["cpu", "cuda"])
     parser.add_argument('-ent', "--entropy", type=bool, default=False,
                         help="Enable entropy selection(FedAvg Only)")
+    parser.add_argument('-ba', "--bellow_average", type=bool, default=False,
+                        help="Enable entropy selection(FedAvg Only)"), 
     parser.add_argument('-did', "--device_id", type=str, default="0")
     parser.add_argument('-data', "--dataset", type=str, default="mnist")
     parser.add_argument('-nb', "--num_classes", type=int, default=10)

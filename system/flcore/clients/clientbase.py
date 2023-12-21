@@ -54,11 +54,13 @@ class Client(object):
         )
         self.learning_rate_decay = args.learning_rate_decay
         
+
     def calculate_data_entropy(self):
         train_data = read_data(self.dataset, self.id, is_train=True)
         data_points = train_data.get('y')
         train_data_entropy = entropy(data_points)
         return train_data_entropy
+
 
     def load_train_data(self, batch_size=None):
         if batch_size == None:
@@ -66,24 +68,34 @@ class Client(object):
         train_data = read_client_data(self.dataset, self.id, is_train=True)
         return DataLoader(train_data, batch_size, drop_last=True, shuffle=True)
 
+
     def load_test_data(self, batch_size=None):
         if batch_size == None:
             batch_size = self.batch_size
         test_data = read_client_data(self.dataset, self.id, is_train=False)
         return DataLoader(test_data, batch_size, drop_last=False, shuffle=True)
         
+
     def set_parameters(self, model):
         for new_param, old_param in zip(model.parameters(), self.model.parameters()):
             old_param.data = new_param.data.clone()
+
+    def set_parameters_malicioso(self, model):
+        for new_param, old_param in zip(model.parameters(), self.model.parameters()):
+            new_param = new_param + 100
+            old_param.data = new_param.data.clone()
+
 
     def clone_model(self, model, target):
         for param, target_param in zip(model.parameters(), target.parameters()):
             target_param.data = param.data.clone()
             # target_param.grad = param.grad.clone()
 
+
     def update_parameters(self, model, new_params):
         for param, new_param in zip(model.parameters(), new_params):
             param.data = new_param.data.clone()
+
 
     def test_metrics(self):
         testloaderfull = self.load_test_data()
@@ -126,6 +138,7 @@ class Client(object):
         auc = metrics.roc_auc_score(y_true, y_prob, average='micro')
         
         return test_acc, test_num, auc
+
 
     def train_metrics(self):
         trainloader = self.load_train_data()
@@ -175,6 +188,7 @@ class Client(object):
         if not os.path.exists(item_path):
             os.makedirs(item_path)
         torch.save(item, os.path.join(item_path, "client_" + str(self.id) + "_" + item_name + ".pt"))
+
 
     def load_item(self, item_name, item_path=None):
         if item_path == None:

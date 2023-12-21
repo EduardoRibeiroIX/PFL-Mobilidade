@@ -1,12 +1,15 @@
+import torch
 import time
 from flcore.clients.clientavg import clientAVG
 from flcore.servers.serverbase import Server
 from threading import Thread
 import os
 import sys
+import numpy as np
 
 
 class FedAvg(Server):
+
     def __init__(self, args, times):
         super().__init__(args, times)
 
@@ -21,6 +24,7 @@ class FedAvg(Server):
         # self.load_model()
         self.Budget = []
     
+
     def select_best_entropy(self):
         dict_clients = {}
         entropies = [0] * len(self.clients)  # initialize entropies with zeros
@@ -35,10 +39,31 @@ class FedAvg(Server):
     
         # Select the top percentage of the clients with the highest entropies
         num_clients = len(sorted_clients)
-        selected_clients = [client for client, entropy in sorted_clients[:num_clients//4]]
+        selected_clients = [client for client, entropy in sorted_clients[ : int(num_clients * self.join_ratio)]]
         print(f'Selected Clients: {len(selected_clients)} clients')
         return selected_clients
     
+
+    def select_clients_bellow_average(self):
+        list_of_accuracies = []
+        average_accuracy = [] 
+
+
+        for i in range(len(self.clients)):
+            list_of_accuracies.append(self.clients[i].test_metrics()[0])
+
+
+        average_accuracy = np.mean(list_of_accuracies)
+        selected_clients = []
+
+
+        for idx_accuracy in range(len(list_of_accuracies)):
+            
+            if list_of_accuracies[idx_accuracy] < average_accuracy:
+                selected_clients.append(self.clients[idx_accuracy])
+
+        return selected_clients
+
 
     def treinamento(self, args, i):
         s_t = time.time()
@@ -59,43 +84,48 @@ class FedAvg(Server):
         # [t.join() for t in threads]
 
         self.receive_models()
+
         if self.dlg_eval and i%self.dlg_gap == 0:
             self.call_dlg(i)
-        self.aggregate_parameters()
+        
+        self.users += self.aggregate_parameters()
 
         self.Budget.append(time.time() - s_t)
+        
         print('-'*25, 'time cost', '-'*25, self.Budget[-1])
 
 
     def train(self, args):
         caminhoAtual = os.getcwd()
         destino = f'{caminhoAtual}/models/fmnist/FedAvg_server.pt'
-
+        
+            
         for i in range(self.global_rounds+1):
 
             if args.entropy:
                 self.selected_clients = self.select_best_entropy()
                 print('Entropy Selection')
+            elif args.bellow_average:
+                self.selected_clients = self.select_clients_bellow_average()
+                print('Bellow Average Selection')
             else:
                 self.selected_clients = self.select_clients()
                 print('Normal Selection')
 
-            if i == 0 and os.path.exists(destino):
-                print('-=-='*40)
-                self.load_model()
-                for cliente in self.selected_clients:
-                    cliente.model = self.global_model
 
-                self.treinamento(args, i)
+            # if i == 0 and os.path.exists(destino):
+            #     self.load_model()
+            #     for cliente in self.selected_clients:
+            #         cliente.model = self.global_model
+            # self.treinamento(args, i)
+            # if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
+            #     break
 
-                if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
-                    break
-
-            else:
-                self.treinamento(args, i)
-                
-                if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
-                    break
+            #else:
+            self.treinamento(args, i)
+            self.users = []
+            if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
+                break
 
 
         print("\nBest accuracy.")

@@ -5,6 +5,7 @@ import h5py
 import copy
 import time
 import random
+import sys
 
 from utils.data_utils import read_client_data
 from utils.dlg import DLG
@@ -39,7 +40,10 @@ class Server(object):
         self.selected_clients = []
         self.train_slow_clients = []
         self.send_slow_clients = []
-
+#-----------------------------------------------------------------
+        self.users = []
+                 
+#-----------------------------------------------------------------
         self.uploaded_weights = []
         self.uploaded_ids = []
         self.uploaded_models = []
@@ -86,11 +90,13 @@ class Server(object):
 
         return slow_clients
 
+
     def set_slow_clients(self):
         self.train_slow_clients = self.select_slow_clients(
             self.train_slow_rate)
         self.send_slow_clients = self.select_slow_clients(
             self.send_slow_rate)
+
 
     def select_clients(self):
         if self.random_join_ratio:
@@ -102,6 +108,7 @@ class Server(object):
         print(f'Selected Clients: {len(selected_clients)} clients')
         return selected_clients
 
+
     def send_models(self):
         assert (len(self.clients) > 0)
 
@@ -112,6 +119,7 @@ class Server(object):
 
             client.send_time_cost['num_rounds'] += 1
             client.send_time_cost['total_cost'] += 2 * (time.time() - start_time)
+
 
     def receive_models(self):
         assert (len(self.selected_clients) > 0)
@@ -134,23 +142,103 @@ class Server(object):
                 self.uploaded_ids.append(client.id)
                 self.uploaded_weights.append(client.train_samples)
                 self.uploaded_models.append(client.model)
+            # if client.id == 0:
+            #     client.set_parameters_malicioso(client.model)
+            #     self.uploaded_models[0] = client.model
         for i, w in enumerate(self.uploaded_weights):
             self.uploaded_weights[i] = w / tot_samples
 
+
     def aggregate_parameters(self):
         assert (len(self.uploaded_models) > 0)
+        add_pr = []
 
         self.global_model = copy.deepcopy(self.uploaded_models[0])
         for param in self.global_model.parameters():
             param.data.zero_()
-            
+        
+
         for w, client_model in zip(self.uploaded_weights, self.uploaded_models):
-            self.add_parameters(w, client_model)
+            add_pr += self.add_parameters(w, client_model)
+        add_pr = [self.valueOfList(add_pr)]
+
+        return add_pr
+
 
     def add_parameters(self, w, client_model):
+        vp = np.array([])
+        valores = []
+        media = []
         for server_param, client_param in zip(self.global_model.parameters(), client_model.parameters()):
+            # client_param = client_param * 1000
+            # print(type(client_param))
+            # print(len(client_param))
+            # print(client_param)
+            # sys.exit()
+            valores.extend(self.valueOfList(client_param.data.clone()))
             server_param.data += client_param.data.clone() * w
+        
+        vp = np.append(vp, valores)
+        media.append(float(vp.sum() / len(vp)))
+        
+        return media
 
+
+    #-------------------------------- My functions---------------------------------------#
+    
+    
+    def valueOfList(self, value):
+        """
+    Retorna uma lista que contém todos os valores inteiros e flutuantes contidos em uma estrutura de dados aninhada.
+
+    Args:
+        value (list, np.ndarray, torch.Tensor): A estrutura de dados da qual você deseja extrair valores inteiros e flutuantes.
+
+    Returns:
+        list: Uma lista contendo todos os valores inteiros e flutuantes encontrados na estrutura de dados.
+
+    Note:
+        - A função aceita estruturas de dados aninhadas (listas dentro de listas).
+        - Se `value` for uma instância de `torch.Tensor`, ela será convertida em um array numpy e depois em uma lista.
+        - Se `value` for uma instância de `np.ndarray`, ela será convertida em uma lista.
+        - A função recursivamente percorre estruturas de dados aninhadas para extrair todos os valores inteiros e flutuantes.
+        - Os valores inteiros e flutuantes extraídos são adicionados à lista `valueList`.
+
+    Exemplos:
+        >>> obj = SuaClasse()
+        >>> tensor = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+        >>> lista = [1, [2, 3.5], [[4, 5.0], 6]]
+        >>> obj.valueOfList(tensor)
+        [1.0, 2.0, 3.0, 4.0]
+        >>> obj.valueOfList(lista)
+        [1, 2, 3.5, 4, 5.0, 6]
+    """
+
+        valueList = list()
+    
+        if type(value) == torch.Tensor:
+            value = value.cpu().numpy()
+            value = value.tolist()
+            self.valueOfList(value)
+
+        if type(value) == np.ndarray:
+            value = value.tolist()
+            self.valueOfList(value)
+
+        if type(value) == list and len(value) > 0:
+            for i in range(len(value)):
+                if type(value[i]) == list and len(value[i]) > 0:
+                    valueList += self.valueOfList(value[i])
+
+                elif type(value[i]) == int or type(value[i]) == float:
+                    valueList.append(value[i])
+
+            return valueList
+    
+    
+    #-------------------------------- My functions---------------------------------------#
+
+    
     def save_global_model(self):
         model_path = os.path.join("models", self.dataset)
         if not os.path.exists(model_path):
@@ -158,17 +246,20 @@ class Server(object):
         model_path = os.path.join(model_path, self.algorithm + "_server" + ".pt")
         torch.save(self.global_model, model_path)
 
+
     def load_model(self):
         model_path = os.path.join("models", self.dataset)
         model_path = os.path.join(model_path, self.algorithm + "_server" + ".pt")
         assert (os.path.exists(model_path))
         self.global_model = torch.load(model_path)
 
+
     def model_exists(self):
         model_path = os.path.join("models", self.dataset)
         model_path = os.path.join(model_path, self.algorithm + "_server" + ".pt")
         return os.path.exists(model_path)
         
+
     def save_results(self):
         algo = self.dataset + "_" + self.algorithm
         result_path = "../results/"
@@ -185,13 +276,16 @@ class Server(object):
                 hf.create_dataset('rs_test_auc', data=self.rs_test_auc)
                 hf.create_dataset('rs_train_loss', data=self.rs_train_loss)
 
+
     def save_item(self, item, item_name):
         if not os.path.exists(self.save_folder_name):
             os.makedirs(self.save_folder_name)
         torch.save(item, os.path.join(self.save_folder_name, "server_" + item_name + ".pt"))
 
+
     def load_item(self, item_name):
         return torch.load(os.path.join(self.save_folder_name, "server_" + item_name + ".pt"))
+
 
     def test_metrics(self):
         if self.eval_new_clients and self.num_new_clients > 0:
@@ -210,6 +304,7 @@ class Server(object):
         ids = [c.id for c in self.clients]
 
         return ids, num_samples, tot_correct, tot_auc
+
 
     def train_metrics(self):
         if self.eval_new_clients and self.num_new_clients > 0:
@@ -237,6 +332,11 @@ class Server(object):
         accs = [a / n for a, n in zip(stats[2], stats[1])]
         aucs = [a / n for a, n in zip(stats[3], stats[1])]
         
+        # Escrever o valor da variável no arquivo
+        with open("saida.txt", "a") as arquivo:
+            arquivo.write(str(test_acc) + "," + str(train_loss)+ "\n")
+
+
         if acc == None:
             self.rs_test_acc.append(test_acc)
         else:
@@ -254,10 +354,12 @@ class Server(object):
         print("Std Test Accurancy: {:.4f}".format(np.std(accs)))
         print("Std Test AUC: {:.4f}".format(np.std(aucs)))
 
+
     def print_(self, test_acc, test_auc, train_loss):
         print("Average Test Accurancy: {:.4f}".format(test_acc))
         print("Average Test AUC: {:.4f}".format(test_auc))
         print("Average Train Loss: {:.4f}".format(train_loss))
+
 
     def check_done(self, acc_lss, top_cnt=None, div_value=None):
         for acc_ls in acc_lss:
@@ -283,6 +385,7 @@ class Server(object):
             else:
                 raise NotImplementedError
         return True
+
 
     def call_dlg(self, R):
         # items = []
@@ -323,6 +426,7 @@ class Server(object):
 
         # self.save_item(items, f'DLG_{R}')
 
+
     def set_new_clients(self, clientObj):
         for i in range(self.num_clients, self.num_clients + self.num_new_clients):
             train_data = read_client_data(self.dataset, i, is_train=True)
@@ -334,6 +438,7 @@ class Server(object):
                             train_slow=False, 
                             send_slow=False)
             self.new_clients.append(client)
+
 
     # fine-tuning on new clients
     def fine_tuning_new_clients(self):
@@ -356,6 +461,7 @@ class Server(object):
                     loss.backward()
                     opt.step()
 
+
     # evaluating on new clients
     def test_metrics_new_clients(self):
         num_samples = []
@@ -370,3 +476,4 @@ class Server(object):
         ids = [c.id for c in self.new_clients]
 
         return ids, num_samples, tot_correct, tot_auc
+
