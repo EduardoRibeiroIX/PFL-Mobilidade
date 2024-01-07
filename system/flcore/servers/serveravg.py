@@ -65,6 +65,17 @@ class FedAvg(Server):
         return selected_clients
 
 
+    def simula_mobilidade(self, i, clientes):
+        if i == 0:
+            self.selected_clients = clientes[0:20]
+        elif i > 0 and len(self.selected_clients) < 60:
+            self.selected_clients = clientes[0:(20+i)]
+        else:
+            self.selected_clients = clientes
+
+        print(f'Nº clientes selecionados=>>>>>>>> {len(self.selected_clients)}')
+
+
     def treinamento(self, args, i):
         s_t = time.time()
 
@@ -109,7 +120,7 @@ class FedAvg(Server):
                 self.selected_clients = self.select_clients_bellow_average()
                 print('Bellow Average Selection')
             else:
-                self.selected_clients = self.select_clients()
+                clientes = self.select_clients()
                 print('Normal Selection')
 
 
@@ -119,9 +130,11 @@ class FedAvg(Server):
             #         cliente.model = self.global_model
             # self.treinamento(args, i)
             # if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
-            #     break
+            #     break{}
 
             #else:
+            self.simula_mobilidade(i, clientes)
+
             self.treinamento(args, i)
             self.users = []
             if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):

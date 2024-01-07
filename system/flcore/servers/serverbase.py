@@ -67,6 +67,7 @@ class Server(object):
         self.eval_new_clients = False
         self.fine_tuning_epoch = args.fine_tuning_epoch
 
+
     def set_clients(self, clientObj):
         for i, train_slow, send_slow in zip(range(self.num_clients), self.train_slow_clients, self.send_slow_clients):
             train_data = read_client_data(self.dataset, i, is_train=True)
@@ -124,8 +125,11 @@ class Server(object):
     def receive_models(self):
         assert (len(self.selected_clients) > 0)
 
+        print(len(self.selected_clients))
+        print(int((1-self.client_drop_rate) * self.current_num_join_clients))
+
         active_clients = random.sample(
-            self.selected_clients, int((1-self.client_drop_rate) * self.current_num_join_clients))
+            self.selected_clients, int((1-self.client_drop_rate) * len(self.selected_clients)))
 
         self.uploaded_ids = []
         self.uploaded_weights = []

@@ -13,7 +13,7 @@ python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 60 -ent True -did 0 
 cat command2.log > EntropySelection.txt
 
 # Run the second command and store the output in a log file
-python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 60 -ba True -did 0 2>&1 | tee command2.log
+python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 60 -ba True -did 0 2>&1 | tee command3.log
 
 # Save the output of the second command to a text file
 cat command3.log > BellowAverage.tx
