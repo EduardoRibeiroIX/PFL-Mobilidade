@@ -114,10 +114,10 @@ class FedAvg(Server):
         for i in range(self.global_rounds+1):
 
             if args.entropy:
-                self.selected_clients = self.select_best_entropy()
+                clientes = self.select_best_entropy()
                 print('Entropy Selection')
             elif args.bellow_average:
-                self.selected_clients = self.select_clients_bellow_average()
+                clientes = self.select_clients_bellow_average()
                 print('Bellow Average Selection')
             else:
                 clientes = self.select_clients()

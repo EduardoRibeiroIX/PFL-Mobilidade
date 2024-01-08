@@ -125,8 +125,8 @@ class Server(object):
     def receive_models(self):
         assert (len(self.selected_clients) > 0)
 
-        print(len(self.selected_clients))
-        print(int((1-self.client_drop_rate) * self.current_num_join_clients))
+        # print(len(self.selected_clients))
+        # print(int((1-self.client_drop_rate) * self.current_num_join_clients))
 
         active_clients = random.sample(
             self.selected_clients, int((1-self.client_drop_rate) * len(self.selected_clients)))
