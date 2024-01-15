@@ -76,6 +76,20 @@ class FedAvg(Server):
         print(f'Nº clientes selecionados=>>>>>>>> {len(self.selected_clients)}')
 
 
+    def power_of_choice(self):
+        d, m = 42, 15
+        set_A = np.random.choice(self.clients, size=d, replace=False)
+        self.clients = set_A
+        self.send_models()
+        losses = [(cliente.test_metrics()[0], cliente.id) for cliente in self.clients]
+        losses_ordenada = sorted(losses, key=lambda x: x[0], reverse=True)
+        st = losses_ordenada[0:m]
+        valor = [cliente for cliente in self.clients for id in st if cliente.id == id[1]]
+        return valor
+
+
+
+
     def treinamento(self, args, i):
         s_t = time.time()
 
@@ -133,7 +147,12 @@ class FedAvg(Server):
             #     break{}
 
             #else:
-            self.simula_mobilidade(i, clientes)
+
+
+            # self.simula_mobilidade(i, clientes)
+            x = self.power_of_choice()
+            print(x)
+            sys.exit()
 
             self.treinamento(args, i)
             self.users = []
