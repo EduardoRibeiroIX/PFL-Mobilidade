@@ -61,10 +61,47 @@ class FedAvg(Server):
             
             if list_of_accuracies[idx_accuracy] < average_accuracy:
                 selected_clients.append(self.clients[idx_accuracy])
-
+        print(f'Selected Clients: {len(selected_clients)} clients')
         return selected_clients
 
 
+    def select_power_of_choice(self):
+        """
+        Função para implementar a estratégia POWER-OF-CHOICE de seleção de clientes.
+
+        Parâmetros:
+        - total: tamanho do dataset
+        - pk: Lista de frações de dados para cada cliente.
+        - d: Número de escolhas a serem consideradas.
+        - CK: Parâmetro adicional para a seleção de clientes.
+
+        Retorna:
+        - Lista dos de clientes selecionados para a próxima rodada.
+        """
+        
+        # Parametros:
+        total = sum(cliente.total_samples for cliente in self.clients)
+        pk = [(cliente.total_samples / total) for cliente in self.clients]
+        d = 50
+        CK = 20
+
+        # Passo 1: Amostra o conjunto de clientes candidatos A
+        candidate_set = np.random.choice(len(pk), size=d, replace=False, p=pk)
+
+        # Passo 2: Perdas Locais
+        local_losses = []
+        for i in candidate_set:
+            self.clients[i].set_parameters(self.global_model)
+            local_losses.append(self.clients[i].test_metrics()[0])
+
+        # Passo 3: Seleciona os clientes com as maiores perdas
+        active_set = candidate_set[np.argsort(local_losses)[-max(CK, 1):]]
+        
+        selected_clients = [self.clients[i] for i in active_set]
+        print(f'Selected Clients: {len(selected_clients)} clients')
+        return selected_clients
+
+    
     def simula_mobilidade(self, i, clientes):
         if i == 0:
             self.selected_clients = clientes[0:20]
@@ -74,20 +111,6 @@ class FedAvg(Server):
             self.selected_clients = clientes
 
         print(f'Nº clientes selecionados=>>>>>>>> {len(self.selected_clients)}')
-
-
-    def power_of_choice(self):
-        d, m = 42, 15
-        set_A = np.random.choice(self.clients, size=d, replace=False)
-        self.clients = set_A
-        self.send_models()
-        losses = [(cliente.test_metrics()[0], cliente.id) for cliente in self.clients]
-        losses_ordenada = sorted(losses, key=lambda x: x[0], reverse=True)
-        st = losses_ordenada[0:m]
-        valor = [cliente for cliente in self.clients for id in st if cliente.id == id[1]]
-        return valor
-
-
 
 
     def treinamento(self, args, i):
@@ -133,6 +156,9 @@ class FedAvg(Server):
             elif args.bellow_average:
                 clientes = self.select_clients_bellow_average()
                 print('Bellow Average Selection')
+            elif args.power_of_choice:
+                clientes = self.select_power_of_choice()
+                print('Power of Choice Selection')
             else:
                 clientes = self.select_clients()
                 print('Normal Selection')
@@ -150,10 +176,8 @@ class FedAvg(Server):
 
 
             # self.simula_mobilidade(i, clientes)
-            x = self.power_of_choice()
-            print(x)
-            sys.exit()
-
+            
+            self.selected_clients = self.select_power_of_choice()
             self.treinamento(args, i)
             self.users = []
             if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):

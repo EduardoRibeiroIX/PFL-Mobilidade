@@ -12,6 +12,8 @@ from utils.dlg import DLG
 
 
 class Server(object):
+
+
     def __init__(self, args, times):
         # Set up the main attributes
         self.args = args
@@ -79,7 +81,6 @@ class Server(object):
                             train_slow=train_slow, 
                             send_slow=send_slow)
             self.clients.append(client)
-
 
     # random select slow clients
     def select_slow_clients(self, slow_rate):

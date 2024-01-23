@@ -27,6 +27,7 @@ class Client(object):
         self.num_classes = args.num_classes
         self.train_samples = train_samples
         self.test_samples = test_samples
+        self.total_samples = self.test_samples + self.train_samples
         self.batch_size = args.batch_size
         self.learning_rate = args.local_learning_rate
         self.local_epochs = args.local_epochs
