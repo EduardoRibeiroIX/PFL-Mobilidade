@@ -107,6 +107,9 @@ class Server(object):
         else:
             self.current_num_join_clients = self.num_join_clients
         selected_clients = list(np.random.choice(self.clients, self.current_num_join_clients, replace=False))
+
+        # indice_final = int(len(selected_clients) * self.join_ratio)
+        # selected_clients = selected_clients[:indice_final]
         print(f'Selected Clients: {len(selected_clients)} clients')
         return selected_clients
 

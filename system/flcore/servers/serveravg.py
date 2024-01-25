@@ -10,6 +10,7 @@ import numpy as np
 
 class FedAvg(Server):
 
+
     def __init__(self, args, times):
         super().__init__(args, times)
 
@@ -39,7 +40,9 @@ class FedAvg(Server):
     
         # Select the top percentage of the clients with the highest entropies
         num_clients = len(sorted_clients)
-        selected_clients = [client for client, entropy in sorted_clients[ : int(num_clients * self.join_ratio)]]
+        selected_clients = [client for client, entropy in sorted_clients[:int(num_clients * self.join_ratio)]]
+
+        
         print(f'Selected Clients: {len(selected_clients)} clients')
         return selected_clients
     
@@ -58,7 +61,6 @@ class FedAvg(Server):
 
 
         for idx_accuracy in range(len(list_of_accuracies)):
-            
             if list_of_accuracies[idx_accuracy] < average_accuracy:
                 selected_clients.append(self.clients[idx_accuracy])
         print(f'Selected Clients: {len(selected_clients)} clients')
@@ -98,6 +100,9 @@ class FedAvg(Server):
         active_set = candidate_set[np.argsort(local_losses)[-max(CK, 1):]]
         
         selected_clients = [self.clients[i] for i in active_set]
+
+        # indice_final = int(len(selected_clients) * self.join_ratio)
+        # selected_clients = selected_clients[:indice_final]
         print(f'Selected Clients: {len(selected_clients)} clients')
         return selected_clients
 
@@ -151,16 +156,16 @@ class FedAvg(Server):
         for i in range(self.global_rounds+1):
 
             if args.entropy:
-                clientes = self.select_best_entropy()
+                self.selected_clients = self.select_best_entropy()
                 print('Entropy Selection')
             elif args.bellow_average:
-                clientes = self.select_clients_bellow_average()
+                self.selected_clients = self.select_clients_bellow_average()
                 print('Bellow Average Selection')
             elif args.power_of_choice:
-                clientes = self.select_power_of_choice()
+                self.selected_clients = self.select_power_of_choice()
                 print('Power of Choice Selection')
             else:
-                clientes = self.select_clients()
+                self.selected_clients = self.select_clients()
                 print('Normal Selection')
 
 
@@ -177,7 +182,8 @@ class FedAvg(Server):
 
             # self.simula_mobilidade(i, clientes)
             
-            self.selected_clients = self.select_power_of_choice()
+            # self.selected_clients = self.select_clients()
+            
             self.treinamento(args, i)
             self.users = []
             if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
@@ -200,3 +206,4 @@ class FedAvg(Server):
             print(f"\n-------------Fine tuning round-------------")
             print("\nEvaluate new clients")
             self.evaluate()
+
