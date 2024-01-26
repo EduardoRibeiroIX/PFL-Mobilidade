@@ -42,10 +42,10 @@ class Server(object):
         self.selected_clients = []
         self.train_slow_clients = []
         self.send_slow_clients = []
-#-----------------------------------------------------------------
+    #-----------------------------------------------------------------
         self.users = []
                  
-#-----------------------------------------------------------------
+    #-----------------------------------------------------------------
         self.uploaded_weights = []
         self.uploaded_ids = []
         self.uploaded_models = []
@@ -342,7 +342,7 @@ class Server(object):
         
         # Escrever o valor da variável no arquivo
         with open("saida.txt", "a") as arquivo:
-            arquivo.write(str(test_acc) + "," + str(train_loss)+ "\n")
+            arquivo.write(str(test_acc) + "," + str(train_loss)+ "," + str(test_auc)+ "\n")
 
 
         if acc == None:
