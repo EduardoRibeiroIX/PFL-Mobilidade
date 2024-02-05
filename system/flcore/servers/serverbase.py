@@ -99,6 +99,10 @@ class Server(object):
         self.send_slow_clients = self.select_slow_clients(
             self.send_slow_rate)
 
+    
+    def client_malicious(self, cliente):
+        cliente.set_parameters_malicioso(self.args.model)
+
 
     def select_clients(self):
         if self.random_join_ratio:
@@ -108,9 +112,9 @@ class Server(object):
             self.current_num_join_clients = self.num_join_clients
         selected_clients = list(np.random.choice(self.clients, self.current_num_join_clients, replace=False))
 
-        # indice_final = int(len(selected_clients) * self.join_ratio)
-        # selected_clients = selected_clients[:indice_final]
         print(f'Selected Clients: {len(selected_clients)} clients')
+        if self.args.client_malicious:
+            self.client_malicious(selected_clients[0])
         return selected_clients
 
 
@@ -194,7 +198,7 @@ class Server(object):
 
     #-------------------------------- My functions---------------------------------------#
     
-    
+
     def valueOfList(self, value):
         """
     Retorna uma lista que contém todos os valores inteiros e flutuantes contidos em uma estrutura de dados aninhada.
@@ -220,7 +224,7 @@ class Server(object):
         [1.0, 2.0, 3.0, 4.0]
         >>> obj.valueOfList(lista)
         [1, 2, 3.5, 4, 5.0, 6]
-    """
+        """
 
         valueList = list()
     
@@ -328,6 +332,7 @@ class Server(object):
         ids = [c.id for c in self.clients]
 
         return ids, num_samples, losses
+
 
     # evaluate selected clients
     def evaluate(self, acc=None, loss=None):

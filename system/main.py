@@ -451,6 +451,8 @@ if __name__ == "__main__":
     parser.add_argument('-Te', "--T_end", type=float, default=0.98)
     # GPFL
     parser.add_argument('-lamr', "--lamda_reg", type=float, default=0.0)
+    parser.add_argument('-mv', "--malicious_value", type=int, default=0)
+    parser.add_argument('-mal', "--client_malicious", type=bool, default=False)
 
 
     args = parser.parse_args()

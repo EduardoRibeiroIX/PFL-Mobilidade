@@ -54,7 +54,7 @@ for cdr_value in "${cdr_values[@]}"; do
 
         python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 58 -jr "$jr_value" -cdr "$cdr_value" -did 0 -ba True 2>&1 | tee "command3_$cdr_value+_$jr_value.log"
         
-        cat "command3_$cdr_value+_$jr_value.log" > "log_BestEntropy$cdr_value+_$jr_value.txt"
+        cat "command3_$cdr_value+_$jr_value.log" > "log_BellowAverage_$cdr_value+_$jr_value.txt"
 
         mv saida.txt "BellowAverage_$cdr_value+_$jr_value.txt"
         mv BellowAverage_$cdr_value+_$jr_value.txt ./saidas/BellowAverage/

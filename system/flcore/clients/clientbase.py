@@ -54,6 +54,8 @@ class Client(object):
             gamma=args.learning_rate_decay_gamma
         )
         self.learning_rate_decay = args.learning_rate_decay
+
+        self.malicious_value = args.malicious_value
         
 
     def calculate_data_entropy(self):
@@ -84,7 +86,7 @@ class Client(object):
 
     def set_parameters_malicioso(self, model):
         for new_param, old_param in zip(model.parameters(), self.model.parameters()):
-            new_param = new_param + 100
+            new_param = new_param + self.malicious_value
             old_param.data = new_param.data.clone()
 
 

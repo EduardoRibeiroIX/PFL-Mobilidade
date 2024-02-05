@@ -151,23 +151,22 @@ class FedAvg(Server):
     def train(self, args):
         caminhoAtual = os.getcwd()
         destino = f'{caminhoAtual}/models/fmnist/FedAvg_server.pt'
-        
             
+
+        if args.entropy:
+            self.selected_clients = self.select_best_entropy()
+            print('Entropy Selection')
+        elif args.bellow_average:
+            self.selected_clients = self.select_clients_bellow_average()
+            print('Bellow Average Selection')
+        elif args.power_of_choice:
+            self.selected_clients = self.select_power_of_choice()
+            print('Power of Choice Selection')
+        else:
+            self.selected_clients = self.select_clients()
+            print('Normal Selection')
+
         for i in range(self.global_rounds+1):
-
-            if args.entropy:
-                self.selected_clients = self.select_best_entropy()
-                print('Entropy Selection')
-            elif args.bellow_average:
-                self.selected_clients = self.select_clients_bellow_average()
-                print('Bellow Average Selection')
-            elif args.power_of_choice:
-                self.selected_clients = self.select_power_of_choice()
-                print('Power of Choice Selection')
-            else:
-                self.selected_clients = self.select_clients()
-                print('Normal Selection')
-
 
             # if i == 0 and os.path.exists(destino):
             #     self.load_model()
@@ -182,7 +181,6 @@ class FedAvg(Server):
 
             # self.simula_mobilidade(i, clientes)
             
-            # self.selected_clients = self.select_clients()
             
             self.treinamento(args, i)
             self.users = []
