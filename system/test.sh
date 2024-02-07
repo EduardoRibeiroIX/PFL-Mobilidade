@@ -3,7 +3,7 @@ python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 58 -did 0 -mv 100 -m
 cat "command1.log" > "log_NormalSelection_Malicious.txt"
 
 mv saida.txt "NormalSelection_Malicious.txt"
-mv NormalSelection.txt log_NormalSelection_Malicious.txt ./saidas/
+mv NormalSelection_Malicious.txt log_NormalSelection_Malicious.txt ./saidas/
 
 python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 58 -did 0 -pow True 2>&1 | tee "command2.log"
 
