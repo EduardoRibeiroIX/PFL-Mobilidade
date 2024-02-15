@@ -101,7 +101,7 @@ class Server(object):
 
     
     def client_malicious(self, cliente):
-        cliente.set_parameters_malicioso(self.args.model)
+        cliente.set_parameters_malicioso(cliente.model)
 
 
     def select_clients(self):
@@ -113,8 +113,7 @@ class Server(object):
         selected_clients = list(np.random.choice(self.clients, self.current_num_join_clients, replace=False))
 
         print(f'Selected Clients: {len(selected_clients)} clients')
-        if self.args.client_malicious:
-            self.client_malicious(selected_clients[0])
+        
         return selected_clients
 
 
@@ -154,9 +153,10 @@ class Server(object):
                 self.uploaded_ids.append(client.id)
                 self.uploaded_weights.append(client.train_samples)
                 self.uploaded_models.append(client.model)
-            # if client.id == 0:
-            #     client.set_parameters_malicioso(client.model)
-            #     self.uploaded_models[0] = client.model
+            if client.id == 1:
+                client.set_parameters_malicioso(client.model)
+                self.uploaded_models[client.id] = client.model
+
         for i, w in enumerate(self.uploaded_weights):
             self.uploaded_weights[i] = w / tot_samples
 
