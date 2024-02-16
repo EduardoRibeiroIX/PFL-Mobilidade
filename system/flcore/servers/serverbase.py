@@ -155,8 +155,7 @@ class Server(object):
                 self.uploaded_models.append(client.model)
             if client.id == 1:
                 client.set_parameters_malicioso(client.model)
-                self.uploaded_models[client.id] = client.model
-
+                
         for i, w in enumerate(self.uploaded_weights):
             self.uploaded_weights[i] = w / tot_samples
 
