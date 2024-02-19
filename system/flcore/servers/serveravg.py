@@ -130,6 +130,9 @@ class FedAvg(Server):
 
         for client in self.selected_clients:
             client.train()
+            if self.args.client_malicious and client.id == 1:
+                client.set_parameters_malicioso(client.model)
+                print('Client Malicious')
 
         # threads = [Thread(target=client.train)
         #            for client in self.selected_clients]
@@ -153,6 +156,7 @@ class FedAvg(Server):
         destino = f'{caminhoAtual}/models/fmnist/FedAvg_server.pt'
     
         for i in range(self.global_rounds+1):
+
 
             if args.entropy:
                 self.selected_clients = self.select_best_entropy()
