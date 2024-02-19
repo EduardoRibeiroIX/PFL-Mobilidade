@@ -1,24 +1,33 @@
-python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 58  -did 0 -pow True 2>&1 | tee "command1.log"
-    
-    cat "command1.log" > "log_Power-of-Choice.txt"
+python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 58 -did 0 -mal True -mv 10 2>&1 | tee "command1.log"
 
-    mv saida.txt "Power-of-Choice.txt"
-    mv Power-of-Choice.txt log_Power-of-Choice.txt ./saidas/
+cat "command1.log" > "log_NormalSelection.txt"
 
-
-cdr_values=(0.16 0.33 0.50)
-jr_values=(0.15 0.20 0.25)
-for cdr_value in "${cdr_values[@]}"; do
-    for jr_value in "${jr_values[@]}"; do
-    
-        python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 58 -jr "$jr_value" -pow True -cdr "$cdr_value" -did 0 2>&1 | tee "command1_$cdr_value+_$jr_value.log"
-        
-        cat "command1_$cdr_value+_$jr_value.log" > "log_Power-of-Choice$cdr_value+_$jr_value.txt"
-
-        mv saida.txt "Power-of-Choice_$cdr_value+_$jr_value.txt"
-        mv Power-of-Choice_$cdr_value+_$jr_value.txt log_Power-of-Choice$cdr_value+_$jr_value.txt ./saidas/
+mv saida.txt "NormalSelection.txt"
+mv NormalSelection.txt log_NormalSelection.txt ./saidas/
 
 
-        rm "command1_$cdr_value+_$jr_value.log"
-    done
-done
+
+python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 58 -did 0 -ent True -mal True -mv 10 2>&1 | tee "command2.log"
+
+cat "command2.log" > "log_BestEntropy.txt"
+
+mv saida.txt "BestEntropy.txt"
+mv BestEntropy.txt log_BestEntropy.txt ./saidas/
+
+
+
+python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 58 -did 0 -ba True -mal True -mv 10 2>&1 | tee "command3.log"
+
+cat "command3.log" > "log_BellowAverage.txt"
+
+mv saida.txt "BellowAverage.txt"
+mv BellowAverage.txt log_BellowAverage.txt ./saidas/
+
+python main.py -data fmnist -m cnn -algo FedAvg -gr 100 -nc 58 -did 0 -pow True -mal True -mv 10 2>&1 | tee "command4.log"
+
+cat "command4.log" > "log_Power_of_Choice.txt"
+
+mv saida.txt "Power_of_Choice.txt"
+mv Power_of_Choice.txt log_Power_of_Choice.txt ./saidas/
+
+rm "command1.log" "command2.log" "command3.log" "command4.log"
