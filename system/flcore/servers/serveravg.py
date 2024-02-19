@@ -118,6 +118,10 @@ class FedAvg(Server):
         print(f'Nº clientes selecionados=>>>>>>>> {len(self.selected_clients)}')
 
 
+    def manipula_gradiente(self, client):
+        client.set_parameters_malicioso(client.model)
+
+
     def treinamento(self, args, i):
         s_t = time.time()
 
@@ -131,8 +135,8 @@ class FedAvg(Server):
         for client in self.selected_clients:
             client.train()
             if self.args.client_malicious and client.id == 1:
-                client.set_parameters_malicioso(client.model)
-                print('Client Malicious')
+                self.manipula_gradiente(client)
+                
 
         # threads = [Thread(target=client.train)
         #            for client in self.selected_clients]
